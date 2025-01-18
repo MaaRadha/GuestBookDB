@@ -8,7 +8,7 @@ namespace FeedBackWebApi.Models
         [MaxLength(150)]
         public string FullName { get; set; } 
         public string Content { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } =  DateTime.UtcNow;
 
         // navigation 
         List<PostReaction> PostReactions { get; set; }
