@@ -12,7 +12,5 @@ namespace FeedBackWebApi.Models
 
         // Navigation property 
         public int PostCommentId { get; set; } // Foreign key 
-        
-
     }
 }
