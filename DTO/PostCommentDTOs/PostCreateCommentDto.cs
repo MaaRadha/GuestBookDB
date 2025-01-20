@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FeedBackWebApi.DTO.PostCommentDTOs
 {
-    public class CreatePostCommentDto
+    public class PostCreateCommentDto
     {
         
         [Required]

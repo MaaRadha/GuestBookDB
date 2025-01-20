@@ -1,6 +1,6 @@
 ﻿namespace FeedBackWebApi.DTO.PostReactionDTOs
 {
-    public class UpdataPostReactionDto
+    public class PostReadReactionDto
     {
         public int Id { get; set; }
         public int Likes { get; set; } = 0;
