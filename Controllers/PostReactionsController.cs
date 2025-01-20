@@ -7,30 +7,47 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FeedBackWebApi.Data;
 using FeedBackWebApi.Models;
+using AutoMapper;
+using System.Net.Mime;
+using FeedBackWebApi.DTO.PostReactionDTOs;
+using FeedBackWebApi.DTO.PostCommentDTOs;
 
 namespace FeedBackWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ApiConventionType(typeof(DefaultApiConventions))]
     public class PostReactionsController : ControllerBase
     {
         private readonly FeedbackDBContext _context;
+        private readonly IMapper _mapper; // Adding mapper
 
-        public PostReactionsController(FeedbackDBContext context)
+        public PostReactionsController(FeedbackDBContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/PostReactions
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PostReaction>>> GetPostReactions()
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<PostReadReactionDto>>> GetPostReactions()
         {
-            return await _context.PostReactions.ToListAsync();
+            var PostReadModel = await _context.PostReactions.ToListAsync();
+
+            return Ok(_mapper.Map<List<PostReadReactionDto>>(PostReadModel));
         }
 
         // GET: api/PostReactions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<PostReaction>> GetPostReaction(int id)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<PostReadReactionDto>> GetPostReaction(int id)
         {
             var postReaction = await _context.PostReactions.FindAsync(id);
 
@@ -39,25 +56,41 @@ namespace FeedBackWebApi.Controllers
                 return NotFound();
             }
 
-            return postReaction;
+            var PostReactionModel = _mapper.Map<PostReadReactionDto>(postReaction);
+
+            return Ok(PostReactionModel);
+
+            //return Ok(_mapper.Map<PostReadReactionDto>(postReaction));
         }
 
         // PUT: api/PostReactions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPostReaction(int id, PostReaction postReaction)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PutPostReaction(int id, PostUpdataReactionDto postUpdateDto)
         {
-            if (id != postReaction.Id)
+            if (id != postUpdateDto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(postReaction).State = EntityState.Modified;
+            var PostReactionModel = await _context.PostReactions.FindAsync(id);
+
+            if (PostReactionModel == null)
+            {
+                return NotFound();
+            }
+
+            // mapper
+            _mapper.Map(postUpdateDto, PostReactionModel);
 
             try
             {
                 await _context.SaveChangesAsync();
             }
+
             catch (DbUpdateConcurrencyException)
             {
                 if (!PostReactionExists(id))
@@ -76,16 +109,24 @@ namespace FeedBackWebApi.Controllers
         // POST: api/PostReactions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<PostReaction>> PostPostReaction(PostReaction postReaction)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<PostReadReactionDto>> PostPostReaction(PostCreateReactionDto postCreateDto)
         {
-            _context.PostReactions.Add(postReaction);
+            var PostCreateReaction = _mapper.Map<PostReaction>(postCreateDto);
+
+            _context.PostReactions.Add(PostCreateReaction);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPostReaction", new { id = postReaction.Id }, postReaction);
+            return CreatedAtAction("GetPostReaction", new { id = PostCreateReaction.Id }, PostCreateReaction);
         }
 
         // DELETE: api/PostReactions/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeletePostReaction(int id)
         {
             var postReaction = await _context.PostReactions.FindAsync(id);
