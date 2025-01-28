@@ -1,6 +1,7 @@
 # Feedback API - Digital Guestbook
 
-![Screenshot 2025-01-20 235748](https://github.com/user-attachments/assets/04d963b5-768a-4540-833b-599d8314617a)
+![image](https://github.com/user-attachments/assets/bca36885-618e-40e0-90df-a5ac82be7155)
+
 
 ## .Net Version 8
 
